@@ -1,0 +1,64 @@
+services:
+  # A web service for the FastAPI backend
+  - type: web
+    name: diy-mod-backend
+    env: python
+    repo: https://github.com/tesims/DIY-MOD.git
+    region: ohio # You can choose a region closer to you
+    branch: main
+    rootDir: ./Backend
+    plan: free
+    healthCheckPath: /ping
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.2
+      - key: GOOGLE_API_KEY
+        fromSecret: GOOGLE_API_KEY # This will be a secret environment variable
+      - key: DATABASE_URL
+        fromService:
+          type: psql
+          name: diy-mod-db
+          property: connectionString
+    build_command: "pip install -r requirements.txt"
+    start_command: "uvicorn fastapi_app:app --host 0.0.0.0 --port 10000"
+
+  # A PostgreSQL database for your data
+  - type: psql
+    name: diy-mod-db
+    plan: free
+    region: ohio
+    ipAllowList: [] # Allows all IP addresses
+    
+  # A Redis instance for caching and Celery
+  - type: redis
+    name: diy-mod-redis
+    plan: free
+    region: ohio
+    ipAllowList: [] # Allows all IP addresses
+
+  # A worker for your Celery tasks
+  - type: worker
+    name: celery-worker
+    env: python
+    repo: https://github.com/tesims/DIY-MOD.git
+    region: ohio
+    branch: main
+    rootDir: ./Backend
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.2
+      - key: GOOGLE_API_KEY
+        fromSecret: GOOGLE_API_KEY
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: diy-mod-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: diy-mod-redis
+          property: connectionString
+    build_command: "pip install -r requirements.txt"
+    start_command: "celery -A CartoonImager.app worker --loglevel=info" 
