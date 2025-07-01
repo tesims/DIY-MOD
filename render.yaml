@@ -1,26 +1,32 @@
 services:
   # A web service for the FastAPI backend
   - type: web
-    name: diy-mod-backend
-    env: python
-    repo: https://github.com/tesims/DIY-MOD.git
-    region: ohio # You can choose a region closer to you
-    branch: main
-    rootDir: ./Backend
-    plan: free
-    healthCheckPath: /ping
+    name: diy-content-moderation
+    runtime: python
+    buildCommand: cd Backend && pip install -r requirements.txt
+    startCommand: cd Backend && uvicorn fastapi_app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.12.2
+        value: 3.12
       - key: GOOGLE_API_KEY
-        fromSecret: GOOGLE_API_KEY # This will be a secret environment variable
-      - key: DATABASE_URL
-        fromService:
-          type: psql
-          name: diy-mod-db
-          property: connectionString
-    build_command: "pip install -r requirements.txt"
-    start_command: "uvicorn fastapi_app:app --host 0.0.0.0 --port 10000"
+        sync: false # Set this in Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false # Set this in Render dashboard
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: PRIMARY_MODEL
+        value: gemini-2.0-flash
+      - key: FALLBACK_MODEL
+        value: gpt-4o-mini
+      - key: USE_GEMINI_FOR_VISION
+        value: true
+      - key: USE_GEMINI_FOR_TEXT
+        value: true
+    healthCheckPath: /ping
+    autoDeploy: true
+    branch: main
+    rootDir: .
+    plan: starter # You can upgrade to standard or pro as needed
 
   # A PostgreSQL database for your data
   - type: psql

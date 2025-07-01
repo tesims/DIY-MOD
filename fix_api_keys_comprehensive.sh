@@ -4,9 +4,22 @@
 echo "🔧 DIY-MOD: Complete API Key System Fix"
 echo "============================================"
 
-# Working API Keys (Based on current API documentation)
-WORKING_GOOGLE_API="AIzaSyBY8gA5D1mN8K7fV9rQ2qS4oW3hT6jR1cE9"  # Google AI Studio API Key
-WORKING_OPENAI_API="sk-proj-abcd1234567890-efgh-ijkl-mnop-qrstuvwxyz123456789"  # OpenAI API Key
+# Read API keys from environment variables or prompt user
+if [ -z "$GOOGLE_API_KEY" ]; then
+    echo "⚠️  GOOGLE_API_KEY not found in environment."
+    echo "Please set your Google AI Studio API key as an environment variable:"
+    echo "export GOOGLE_API_KEY='your_google_api_key_here'"
+    exit 1
+fi
+
+if [ -z "$OPENAI_API_KEY" ]; then
+    echo "⚠️  OPENAI_API_KEY not found in environment."
+    echo "Please set your OpenAI API key as an environment variable:"
+    echo "export OPENAI_API_KEY='your_openai_api_key_here'"
+    exit 1
+fi
+
+echo "✅ API keys found in environment variables"
 
 echo "🔍 Step 1: Checking SSH connection..."
 if ! ssh -i ~/Downloads/rayhan-keypair.pem ubuntu@13.58.180.224 "echo 'SSH connection successful'"; then
@@ -36,11 +49,11 @@ cd /opt/DIY-MOD/Backend
 # Create .env file with working API keys
 cat > .env << 'EOF'
 # Google Gemini API Configuration (Primary for Vision)
-GOOGLE_API_KEY=AIzaSyBY8gA5D1mN8K7fV9rQ2qS4oW3hT6jR1cE9
-GEMINI_API_KEY=AIzaSyBY8gA5D1mN8K7fV9rQ2qS4oW3hT6jR1cE9
+GOOGLE_API_KEY=$GOOGLE_API_KEY
+GEMINI_API_KEY=$GOOGLE_API_KEY
 
 # OpenAI API Configuration (Fallback for Text)
-OPENAI_API_KEY=sk-proj-abcd1234567890-efgh-ijkl-mnop-qrstuvwxyz123456789
+OPENAI_API_KEY=$OPENAI_API_KEY
 
 # Configuration Flags
 USE_GEMINI_FOR_VISION=true
@@ -53,16 +66,16 @@ OPENAI_API_BASE=https://api.openai.com/v1
 EOF
 
 # Set environment variables for current session
-export GOOGLE_API_KEY='AIzaSyBY8gA5D1mN8K7fV9rQ2qS4oW3hT6jR1cE9'
-export GEMINI_API_KEY='AIzaSyBY8gA5D1mN8K7fV9rQ2qS4oW3hT6jR1cE9'
-export OPENAI_API_KEY='sk-proj-abcd1234567890-efgh-ijkl-mnop-qrstuvwxyz123456789'
+export GOOGLE_API_KEY="${GOOGLE_API_KEY}"
+export GEMINI_API_KEY="${GOOGLE_API_KEY}"
+export OPENAI_API_KEY="${OPENAI_API_KEY}"
 export USE_GEMINI_FOR_VISION=true
 export USE_GEMINI_FOR_TEXT=true
 
 # Add to shell profiles for persistence
-echo 'export GOOGLE_API_KEY=AIzaSyBY8gA5D1mN8K7fV9rQ2qS4oW3hT6jR1cE9' >> ~/.bashrc
-echo 'export GEMINI_API_KEY=AIzaSyBY8gA5D1mN8K7fV9rQ2qS4oW3hT6jR1cE9' >> ~/.bashrc
-echo 'export OPENAI_API_KEY=sk-proj-abcd1234567890-efgh-ijkl-mnop-qrstuvwxyz123456789' >> ~/.bashrc
+echo 'export GOOGLE_API_KEY="${GOOGLE_API_KEY}"' >> ~/.bashrc
+echo 'export GEMINI_API_KEY="${GOOGLE_API_KEY}"' >> ~/.bashrc
+echo 'export OPENAI_API_KEY="${OPENAI_API_KEY}"' >> ~/.bashrc
 echo 'export USE_GEMINI_FOR_VISION=true' >> ~/.bashrc
 echo 'export USE_GEMINI_FOR_TEXT=true' >> ~/.bashrc
 
@@ -80,7 +93,7 @@ import os
 
 # Gemini Configuration (Primary)
 GEMINI_CONFIG = {
-    'api_key': os.getenv('GOOGLE_API_KEY', 'AIzaSyBY8gA5D1mN8K7fV9rQ2qS4oW3hT6jR1cE9'),
+    'api_key': os.getenv('GOOGLE_API_KEY', 'your_google_api_key_here'),
     'model_vision': 'gemini-2.0-flash',
     'model_text': 'gemini-2.0-flash',  
     'base_url': 'https://generativelanguage.googleapis.com/v1beta',
@@ -90,7 +103,7 @@ GEMINI_CONFIG = {
 
 # OpenAI Configuration (Fallback)
 OPENAI_CONFIG = {
-    'api_key': os.getenv('OPENAI_API_KEY', 'sk-proj-abcd1234567890-efgh-ijkl-mnop-qrstuvwxyz123456789'),
+    'api_key': os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here'),
     'model_text': 'gpt-4o-mini',
     'base_url': 'https://api.openai.com/v1',
     'use_for_fallback': True

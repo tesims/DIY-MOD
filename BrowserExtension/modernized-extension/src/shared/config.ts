@@ -112,10 +112,10 @@ function getApiConfig() {
   const isLocalDev = isDevelopment();
   
   if (isLocalDev) {
-    // Local development configuration - using SSH tunnel to EC2
+    // Local development configuration - using local server
     return {
-      baseUrl: 'http://localhost:5001',  // SSH tunnel to remote server
-      pollingBaseUrl: 'http://localhost:5001',
+      baseUrl: 'http://localhost:8000',  // Local development server
+      pollingBaseUrl: 'http://localhost:8000',
       maxRetries: 2,  // Faster feedback in development
       requestTimeoutMs: 90000,  // Extended timeout for WebSocket processing (90 seconds)
       polling: {
@@ -124,10 +124,10 @@ function getApiConfig() {
       },
     };
   } else {
-    // Production configuration (via SSH tunnel)
+    // Production configuration (Render deployment)
     return {
-      baseUrl: 'http://localhost:5001',  // SSH tunnel to EC2 instance
-      pollingBaseUrl: 'http://localhost:5001',
+      baseUrl: 'https://diy-content-moderation.onrender.com',  // Replace with your actual Render URL
+      pollingBaseUrl: 'https://diy-content-moderation.onrender.com',
       maxRetries: 3,
       requestTimeoutMs: 60000,
       polling: {

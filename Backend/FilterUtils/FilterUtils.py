@@ -170,7 +170,7 @@ For each element, provide:
 The elements to analyze are: {filters}.
 
 Please respond with a JSON array of objects, each including: 'element', 'present', 'coverage', and 'centrality'.
-Example format: [{"element": "guitar", "present": 1, "coverage": 8, "centrality": 9}]
+Example format: [{{"element": "guitar", "present": 1, "coverage": 8, "centrality": 9}}]
 """
             
             # Make API call with retry
