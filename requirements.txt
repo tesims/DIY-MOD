@@ -1,0 +1,69 @@
+# Core FastAPI and web dependencies
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.19
+websockets==14.1
+
+# Environment and configuration
+python-dotenv==1.0.1
+PyYAML==6.0.2
+
+# AI and LLM dependencies
+openai
+google-genai
+transformers==4.49.0
+torch==2.6.0
+torchvision==0.21.0
+tokenizers==0.21.0
+accelerate
+bitsandbytes
+
+# Database
+SQLAlchemy
+
+# HTTP and async support
+aiohttp
+httpx==0.28.1
+requests==2.32.3
+
+# Data processing and analysis
+pandas==2.2.3
+numpy==2.1.1
+scipy==1.15.2
+
+# Image processing
+opencv-python==4.11.0.86
+pillow==11.1.0
+ultralytics==8.3.78
+ultralytics-thop==2.0.14
+
+# Web scraping and parsing
+beautifulsoup4==4.13.3
+bs4==0.0.2
+
+# Background task processing
+celery
+redis==5.2.1
+
+# Utilities
+jsonpath-ng==1.4.3
+termcolor==2.5.0
+tqdm==4.67.1
+psutil==7.0.0
+
+# Core Python dependencies
+pydantic
+click==8.1.8
+certifi==2025.1.31
+charset-normalizer==3.4.1
+urllib3==2.3.0
+typing_extensions==4.12.2
+
+# Development and testing (optional for production)
+pytest==8.0.0
+pytest-asyncio==0.23.5
+beautifulsoup4
+lxml 
+aiofiles 
+databases 
+asyncpg

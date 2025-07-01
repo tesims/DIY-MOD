@@ -3,11 +3,19 @@ services:
   - type: web
     name: diy-content-moderation
     runtime: python
-    buildCommand: cd Backend && pip install -r requirements.txt
-    startCommand: cd Backend && uvicorn fastapi_app:app --host 0.0.0.0 --port $PORT
+    pythonVersion: "3.12.2"
+    rootDir: ./Backend
+    buildCommand: |
+      echo "Starting DIY Mod build process..."
+      python --version
+      python check_deployment_env.py
+      python3.12 -m pip install --upgrade pip
+      python3.12 -m pip install -r requirements.txt
+      echo "Build completed successfully!"
+    startCommand: uvicorn fastapi_app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.12
+        value: 3.12.2
       - key: GOOGLE_API_KEY
         sync: false # Set this in Render dashboard
       - key: OPENAI_API_KEY
@@ -25,7 +33,7 @@ services:
     healthCheckPath: /ping
     autoDeploy: true
     branch: main
-    rootDir: .
+    clearCache: true
     plan: starter # You can upgrade to standard or pro as needed
 
   # A PostgreSQL database for your data
@@ -46,7 +54,7 @@ services:
   - type: worker
     name: celery-worker
     env: python
-    repo: https://github.com/tesims/DIY-MOD.git
+    pythonVersion: "3.12.2"
     region: ohio
     branch: main
     rootDir: ./Backend
@@ -55,7 +63,9 @@ services:
       - key: PYTHON_VERSION
         value: 3.12.2
       - key: GOOGLE_API_KEY
-        fromSecret: GOOGLE_API_KEY
+        sync: false # Set this in Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false # Set this in Render dashboard
       - key: CELERY_BROKER_URL
         fromService:
           type: redis
@@ -66,5 +76,7 @@ services:
           type: redis
           name: diy-mod-redis
           property: connectionString
-    build_command: "pip install -r requirements.txt"
-    start_command: "celery -A CartoonImager.app worker --loglevel=info" 
+    buildCommand: |
+      python3.12 -m pip install --upgrade pip
+      python3.12 -m pip install -r requirements.txt
+    startCommand: celery -A CartoonImager.app worker --loglevel=info 

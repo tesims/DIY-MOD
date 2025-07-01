@@ -1,182 +1,145 @@
 # DIY Content Moderation System
 
-A browser extension that provides real-time content filtering and moderation for social media feeds using AI-powered analysis and rewriting.
+An AI-powered content moderation system that provides real-time filtering for social media platforms like Reddit and Twitter. The system uses advanced LLM models (Google Gemini, OpenAI GPT) to analyze and filter content based on user-defined preferences.
 
-## 🏗️ Architecture
+## 🚀 Features
 
-### Backend (FastAPI + Python)
-- **FastAPI Server**: RESTful API with **real-time WebSocket support**
-- **Content Processing**: LLM-powered text analysis and rewriting
-- **Image Processing**: Google Vision API integration for image analysis
-- **Database**: SQLite for user data and filter management
-- **Real-time Processing**: WebSocket-based processing with HTTP fallback
-
-### Browser Extension (TypeScript + Chrome Extension API)
-- **Content Interception**: Real-time DOM manipulation
-- **Platform Support**: Reddit, Twitter/X
-- **User Interface**: Dynamic filter management
-- **Local Storage**: User preferences and configuration
+- **Real-time Content Filtering**: Filter posts, comments, and images on Reddit and Twitter
+- **AI-Powered Analysis**: Uses Google Gemini and OpenAI GPT models for intelligent content analysis
+- **Browser Extension**: Seamless integration with social media platforms
+- **Custom Filters**: Create personalized content filters with various intensity levels
+- **WebSocket Support**: Real-time communication for instant content processing
+- **Image Processing**: Advanced image analysis and filtering capabilities
+- **User Preferences**: Customizable filtering rules and visual settings
 
 ## 📁 Project Structure
 
 ```
 DIY_Mod/
-├── Backend/
-│   ├── fastapi_app.py              # Main FastAPI application
-│   ├── processors/                 # Content processing modules
-│   │   ├── base_processor.py       # Base content processor
-│   │   ├── reddit_processor.py     # Reddit-specific processing
-│   │   └── twitter_processor.py    # Twitter-specific processing
-│   ├── llm/                        # LLM integration
-│   │   ├── processor.py            # Main LLM processing logic
-│   │   ├── prompts.py              # LLM prompt templates
-│   │   └── chat.py                 # Chat interface
-│   ├── ImageProcessor/             # Image processing
-│   │   └── ImageProcessor.py       # Google Vision API integration
-│   ├── FilterUtils/                # Filter utilities
-│   │   └── FilterUtils.py          # Filter matching and scoring
-│   ├── database/                   # Database operations
-│   ├── utils/                      # Utility modules
-│   ├── start_server.sh             # Production server startup
-│   ├── start_local_system.sh       # Local development startup
-│   └── requirements.txt            # Python dependencies
-├── BrowserExtension/
-│   └── modernized-extension/       # Chrome extension
-│       ├── src/                    # TypeScript source code
-│       ├── manifest.json           # Extension manifest
-│       ├── package.json            # Node.js dependencies
-│       └── dist/                   # Built extension (generated)
-├── EXTENSION_TESTING.md            # Testing guide
-├── LOCAL_DEVELOPMENT.md            # Development setup guide
-└── README.md                       # This file
+├── Backend/              # FastAPI backend server
+│   ├── database/         # Database models and operations
+│   ├── llm/             # LLM integration and processing
+│   ├── processors/      # Content processors (Reddit, Twitter)
+│   ├── utils/           # Utility functions and configuration
+│   └── fastapi_app.py   # Main FastAPI application
+├── Extension/           # Browser extension
+│   └── modernized-extension/  # Chrome/Edge extension source
+├── docs/               # Documentation files
+├── scripts/            # Deployment and utility scripts
+├── tests/              # Test files and utilities
+├── config/             # Configuration templates
+└── render.yaml         # Render deployment configuration
 ```
 
-## 🚀 Quick Start
+## 🛠️ Quick Start
 
-### Prerequisites
-- Python 3.12+
-- Node.js 18+
-- Google API Key (Gemini)
-- OpenAI API Key (optional)
+### 1. Deploy to Render (Recommended)
 
-### 1. Backend Setup
+The easiest way to get started:
 
 ```bash
-cd Backend
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or
-venv\Scripts\activate     # Windows
+# 1. Clone this repository
+git clone https://github.com/tesims/DIY-MOD.git
+cd DIY-MOD
 
-pip install -r requirements.txt
+# 2. Deploy to Render
+./scripts/deploy_to_render.sh
+
+# 3. Follow the deployment guide
+cat docs/RENDER_DEPLOYMENT.md
 ```
 
-### 2. Environment Configuration
+### 2. Local Development
 
-Create `Backend/.env`:
-```env
+For local development:
+
+```bash
+# 1. Set up local environment
+./scripts/local_dev_setup.sh
+
+# 2. Start the system
+./scripts/start_local_system.sh
+
+# 3. Load browser extension from Extension/modernized-extension/dist
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Set these in your Render dashboard or local `.env` file:
+
+```bash
 GOOGLE_API_KEY=your_google_api_key_here
 OPENAI_API_KEY=your_openai_api_key_here
+LLM_PROVIDER=gemini
+PRIMARY_MODEL=gemini-2.0-flash
+FALLBACK_MODEL=gpt-4o-mini
+USE_GEMINI_FOR_VISION=true
+USE_GEMINI_FOR_TEXT=true
 ```
 
-### 3. Browser Extension Setup
+### API Keys
+
+- **Google AI Studio**: [Get API Key](https://aistudio.google.com/app/apikey)
+- **OpenAI**: [Get API Key](https://platform.openai.com/api-keys)
+
+## 📚 Documentation
+
+- [🚀 Render Deployment Guide](docs/RENDER_DEPLOYMENT.md)
+- [💻 Local Development Setup](docs/LOCAL_DEVELOPMENT.md)
+- [🧪 Testing Instructions](docs/TESTING_SETUP.md)
+- [🔌 Extension Testing](docs/EXTENSION_TESTING.md)
+- [🌐 WebSocket Implementation](docs/WEBSOCKET_IMPLEMENTATION.md)
+
+## 🧪 Testing
+
+Verify your deployment:
 
 ```bash
-cd BrowserExtension/modernized-extension
-npm install
-npm run build
+# Test Render deployment
+./scripts/verify_render_deployment.sh https://your-app.onrender.com
+
+# Test local system
+./scripts/verify_system.sh
 ```
 
-### 4. Start the System
+## 🔒 Security
 
-**Production (EC2 server):**
-```bash
-cd Backend
-./start_server.sh
-```
-
-**Local Development:**
-```bash
-./start_local_system.sh
-```
-
-### 5. Load Extension in Browser
-
-1. Open Chrome and go to `chrome://extensions/`
-2. Enable "Developer mode"
-3. Click "Load unpacked"
-4. Select the `BrowserExtension/modernized-extension/dist` folder
-
-## 🔧 Development
-
-### Local Development
-See [LOCAL_DEVELOPMENT.md](LOCAL_DEVELOPMENT.md) for detailed setup instructions.
-
-### Testing
-See [EXTENSION_TESTING.md](EXTENSION_TESTING.md) for testing procedures.
-
-### Key Features
-- ✅ Real-time content filtering on Reddit and Twitter/X
-- ✅ AI-powered content rewriting and moderation
-- ✅ Image analysis and filtering using Google Vision API
-- ✅ User-customizable filters with intensity levels
-- ✅ Retry logic for API failures
-- ✅ Comprehensive error handling and logging
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Extension not loading:**
-- Ensure the extension is built: `npm run build`
-- Check browser console for errors
-- Verify manifest.json is valid
-
-**Backend connection issues:**
-- Check if server is running on correct port
-- Verify API keys are set in environment
-- Check firewall/network settings
-
-**API errors:**
-- Verify Google API key is valid and has proper permissions
-- Check rate limits and quotas
-- Review server logs for detailed error messages
-
-## 🔄 WebSocket Implementation
-
-The system now uses **real-time WebSocket communication** for faster processing:
-
-- **Default Mode**: WebSocket-based processing with automatic HTTP fallback
-- **Performance**: Eliminates polling delays and reduces server load  
-- **Reliability**: Auto-reconnection with exponential backoff
-- **Compatibility**: Falls back to HTTP if WebSocket fails
-
-See [WEBSOCKET_IMPLEMENTATION.md](WEBSOCKET_IMPLEMENTATION.md) for detailed technical information.
-
-## 📝 System Status
-
-**✅ Working Components:**
-- Reddit content processing (text + images)
-- Twitter/X content processing (text + images)
-- LLM-based content rewriting
-- Image analysis with Google Vision API
-- Filter management and user preferences
-- **Real-time WebSocket communication**
-- Browser extension functionality with auto-fallback
-
-**🚧 Known Issues:**
-- SSH tunnel connectivity can be unstable
-- Local development environment has some import conflicts
-- Rate limiting may cause temporary API failures
+- **No Secrets in Code**: All API keys are set as environment variables
+- **CORS Protection**: Configured for specific domains only
+- **Input Validation**: All user inputs are validated and sanitized
+- **Rate Limiting**: Built-in protection against abuse
 
 ## 🤝 Contributing
 
-1. Follow the project structure guidelines
-2. Use TypeScript for browser extension code
-3. Follow Python PEP 8 for backend code
-4. Add tests for new functionality
-5. Update documentation as needed
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
 ## 📄 License
 
-This project is for educational and research purposes.
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+If you encounter issues:
+
+1. Check the [documentation](docs/)
+2. Review deployment logs in Render dashboard
+3. Test with verification scripts
+4. Open an issue on GitHub
+
+## 🏗️ Architecture
+
+- **Backend**: FastAPI with SQLAlchemy, Redis caching, Celery workers
+- **Frontend**: TypeScript browser extension with Vite build system
+- **AI/ML**: Google Gemini and OpenAI GPT integration
+- **Deployment**: Render with PostgreSQL and Redis managed services
+- **Real-time**: WebSocket connections for instant content processing
+
+---
+
+**Built with ❤️ for a safer, more personalized social media experience.**

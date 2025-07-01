@@ -9,56 +9,51 @@ python-dotenv==1.0.1
 PyYAML==6.0.2
 
 # AI and LLM dependencies
-openai==1.63.0
-google-generativeai
-transformers==4.49.0
-torch==2.6.0
-torchvision==0.21.0
-tokenizers==0.21.0
-accelerate
-bitsandbytes
+openai
+google-genai
+google-generativeai  # Fallback for compatibility
 
 # Database
-SQLAlchemy==2.0.25
+SQLAlchemy
 
 # HTTP and async support
-aiohttp==3.9.3
-httpx==0.28.1
-requests==2.32.3
+aiohttp
+httpx
+requests
 
-# Data processing and analysis
-pandas==2.2.3
-numpy==2.1.1
-scipy==1.15.2
+# Data processing and analysis (lightweight versions)
+pandas
+numpy
 
-# Image processing
-opencv-python==4.11.0.86
-pillow==11.1.0
-ultralytics==8.3.78
-ultralytics-thop==2.0.14
+# Image processing (essential only)
+pillow
 
 # Web scraping and parsing
-beautifulsoup4==4.13.3
-bs4==0.0.2
+beautifulsoup4
+lxml
 
 # Background task processing
 celery
-redis==5.2.1
+redis
 
 # Utilities
 jsonpath-ng==1.4.3
 termcolor==2.5.0
-tqdm==4.67.1
 psutil==7.0.0
 
 # Core Python dependencies
-pydantic==2.10.6
-click==8.1.8
-certifi==2025.1.31
-charset-normalizer==3.4.1
-urllib3==2.3.0
-typing_extensions==4.12.2
+pydantic
+click
+certifi
+charset-normalizer
+urllib3
+typing_extensions
 
-# Development and testing (optional for production)
-pytest==8.0.0
-pytest-asyncio==0.23.5
+# Essential async support
+aiofiles
+databases
+asyncpg
+
+# Development and testing (lightweight)
+pytest
+pytest-asyncio

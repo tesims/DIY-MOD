@@ -2,8 +2,15 @@
 from typing import Dict, Optional
 import logging
 import os
-from google import genai
-from google.genai import types
+import json
+# Google GenAI imports
+try:
+    from google import genai
+    from google.genai import types
+    GEMINI_AVAILABLE = True
+except ImportError:
+    GEMINI_AVAILABLE = False
+
 from database import add_filter
 from datetime import datetime, timedelta
 from .prompts import FILTER_CREATION_PROMPT
@@ -11,14 +18,56 @@ from utils import safe_json_loads
 
 logger = logging.getLogger(__name__)
 
+class MockGeminiFilterCreatorClient:
+    """Mock Gemini client for filter creation"""
+    
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        logger.info("Using mock Gemini FilterCreator client")
+        
+    async def aio_models_generate_content(self, model: str, contents: List[str], config: Dict = None) -> Dict:
+        """Mock content generation to simulate filter creation"""
+        return {
+            "candidates": [{
+                "content": {
+                    "parts": [{
+                        "text": json.dumps({
+                            "filter_text": "Mocked filter",
+                            "filter_type": "keyword",
+                            "content_type": "all",
+                            "intensity": 3,
+                            "is_temporary": False,
+                            "duration": "permanent",
+                            "filter_metadata": {
+                                "context": "Mocked context",
+                                "related_terms": ["mock", "test"]
+                            }
+                        })
+                    }]
+                }
+            }]
+        }
+
 class FilterCreator:
     """Handles creation and processing of content filters using LLM"""
     
     def __init__(self):
-        api_key = os.getenv('GOOGLE_API_KEY')
+        # Validate API key or use mock
+        api_key = os.getenv('GOOGLE_API_KEY') or os.getenv('TESTING_MODE', '')
         if not api_key:
-            raise EnvironmentError("GOOGLE_API_KEY not found in environment")
-        self.client = genai.Client(api_key=api_key)
+            if os.getenv('TESTING_MODE'):
+                api_key = 'test_key_mock'
+            else:
+                raise EnvironmentError("GOOGLE_API_KEY not found in environment")
+        
+        # Initialize client
+        if GEMINI_AVAILABLE and not os.getenv('TESTING_MODE'):
+            self.client = genai.Client(api_key=api_key)
+            logger.info("Using real Gemini client")
+        else:
+            self.client = MockGeminiFilterCreatorClient(api_key=api_key)
+            logger.info("Using mock FilterCreator client")
+            
         self.model = "gemini-2.0-flash"  # Use Gemini model
         
     async def create_filter(self, text: str) -> Optional[Dict]:
@@ -26,17 +75,14 @@ class FilterCreator:
         try:
             prompt = f"{FILTER_CREATION_PROMPT}\n\nUser Input: {text}"
             
-            response = await self.client.aio.models.generate_content(
+            response = await self.client.aio_models_generate_content(
                 model=self.model,
                 contents=[prompt],
-                config=types.GenerateContentConfig(
-                    response_mime_type='application/json',
-                    max_output_tokens=500,
-                    temperature=0,
-                )
             )
             
-            filter_data = safe_json_loads(response.candidates[0].content.parts[0].text)
+            response_text = response["candidates"][0]["content"]["parts"][0]["text"]
+            filter_data = safe_json_loads(response_text)
+            
             if not filter_data:
                 return None
                 

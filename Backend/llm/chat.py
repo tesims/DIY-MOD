@@ -1,10 +1,16 @@
 """Handles chat-based filter creation and management"""
-from google import genai
-from google.genai import types
 from typing import Dict, List
 import json
 import os
 import logging
+# Google GenAI imports
+try:
+    from google import genai
+    from google.genai import types
+    GEMINI_AVAILABLE = True
+except ImportError:
+    GEMINI_AVAILABLE = False
+    
 from dotenv import load_dotenv
 from .processor import ContentFilter
 from .chat_system_prompt import CHAT_SYSTEM_PROMPT
@@ -12,6 +18,31 @@ from utils.config import ConfigManager
 from database.operations import get_user_filters
 
 logger = logging.getLogger(__name__)
+
+class MockGeminiChatClient:
+    """Mock Gemini client for chat functionality"""
+    
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        logger.info("Using mock Gemini Chat client")
+        
+    def models_generate_content(self, model: str, contents: List[str], config: Dict = None) -> Dict:
+        """Mock content generation to simulate a chat response"""
+        return {
+            "candidates": [{
+                "content": {
+                    "parts": [{
+                        "text": json.dumps({
+                            "text": "This is a mocked response. How can I help you create a filter?",
+                            "type": "clarify",
+                            "options": ["Filter text", "Filter images"],
+                            "conversation_state": "initial",
+                            "filter_data": {}
+                        })
+                    }]
+                }
+            }]
+        }
 
 class FilterCreationChat:
     """Manages chat-based filter creation workflow"""
@@ -21,13 +52,23 @@ class FilterCreationChat:
         config = ConfigManager()
         llm_config = config.get_llm_config()
         
-        # Validate API key
-        api_key = os.getenv('GOOGLE_API_KEY')
+        # Validate API key or use mock
+        api_key = os.getenv('GOOGLE_API_KEY') or os.getenv('TESTING_MODE', '')
         if not api_key:
-            raise EnvironmentError("GOOGLE_API_KEY not found in environment")
+            if os.getenv('TESTING_MODE'):
+                api_key = 'test_key_mock'
+            else:
+                raise EnvironmentError("GOOGLE_API_KEY not found in environment")
             
-        self.client = genai.Client(api_key=api_key)
-        self.chat_model = llm_config.chat_model  # Get model from config
+        # Initialize client
+        if GEMINI_AVAILABLE and not os.getenv('TESTING_MODE'):
+            self.client = genai.Client(api_key=api_key)
+            logger.info("Using real Gemini client")
+        else:
+            self.client = MockGeminiChatClient(api_key=api_key)
+            logger.info("Using mock FilterCreationChat client")
+            
+        self.chat_model = llm_config.chat_model
         logger.info(f"Initialized FilterCreationChat with model {self.chat_model}")
         
     def process_chat(self, message: str, history: List[Dict], user_id: str = None) -> Dict:
@@ -82,17 +123,12 @@ class FilterCreationChat:
         prompt += f"\nuser: {message}\n\nPlease respond in JSON format with the required fields."
 
         try:
-            response = self.client.models.generate_content(
+            response = self.client.models_generate_content(
                 model=self.chat_model,
-                contents=[prompt],
-                config=types.GenerateContentConfig(
-                    response_mime_type='application/json',
-                    max_output_tokens=1000,
-                    temperature=0.1,
-                )
+                contents=[prompt]
             )
             
-            raw_response = response.candidates[0].content.parts[0].text
+            raw_response = response["candidates"][0]["content"]["parts"][0]["text"]
             logger.debug(f"Raw Chat LLM response: {raw_response}")
             
             try:
